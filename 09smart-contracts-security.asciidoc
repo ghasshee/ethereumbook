@@ -1,17 +1,32 @@
 [[smart_contract_security]]
 == Smart Contract Security
 
-((("security (smart contracts)", id="ix_09smart-contracts-security-asciidoc0", range="startofrange")))((("smart contracts","security", id="ix_09smart-contracts-security-asciidoc1", range="startofrange")))Security is one of the most important considerations when writing smart contracts. In the field of smart contract programming, mistakes are costly and easily exploited. In this chapter we will look at security best practices and design patterns, as well as "security antipatterns," which are practices and patterns that can introduce vulnerabilities in our smart contracts.
+((("security (smart contracts)", id="ix_09smart-contracts-security-asciidoc0", range="startofrange")))((("smart contracts","security", id="ix_09smart-contracts-security-asciidoc1", range="startofrange")))
 
-As with other programs, a smart contract will execute exactly what is written, which is not always what the programmer intended. Furthermore, all smart contracts are public, and any user can interact with them simply by creating a transaction. Any vulnerability can be exploited, and losses are almost always impossible to recover. It is therefore critical to follow best practices and use well-tested design patterns.
+セキュリティはスマートコントラクトを書く際、最も気をつけるべきことの一つである。スマートコントラクトのプログラミングの世界では、間違いを犯すと、簡単に発見され、ひどい痛手を追うことになる。
+この章では、 我々のスマートコントラクト上で脆弱性を持つ "security antipatterns"　とともにセキュリティの教訓、デザインパターンを見ていこう。
+
+
+他のプログラムと同様に、ある一つのスマートコントラクは、正確にそこに書かれてあることを実行します。それは必ずしもプログラマが意図したものであるとは限りません。
+さらに全てのスマートコントラクトは公然に晒されており、どのユーザーも単にトランザクションを発行するだけで、それらのコントラクトに働きかけることができます。
+脆弱性は全て、露出し、ミスは取り返しがつきません。
+そのため、教訓に従い、well-tested なデザインパターンを使うことを迫られるのです。
+
 
 === Security Best Practices
 
-((("defensive programming")))((("security (smart contracts)","best practices")))_Defensive programming_ is a style of programming that is particularly well suited to smart contracts. It emphasizes the following, all of which are best practices:
 
-Minimalism/simplicity:: Complexity is the enemy of security. The simpler the code, and the less it does, the lower the chances are of a bug or unforeseen effect occurring. When first engaging in smart contract programming, developers are often tempted to try to write a lot of code. Instead, you should look through your smart contract code and try to find ways to do less, with fewer lines of code, less complexity, and fewer "features." If someone tells you that their project has produced "thousands of lines of code" for their smart contracts, you should question the security of that project. Simpler is more secure.
 
-Code reuse:: Try not to reinvent the wheel. If a library or contract already exists that does most of what you need, reuse it. Within your own code, follow the DRY principle: Don't Repeat Yourself. If you see any snippet of code repeated more than once, ask yourself whether it could be written as a function or library and reused. Code that has been extensively used and tested is likely more secure than any new code you write. Beware of &#x201c;Not Invented Here&#x201d; syndrome, where you are tempted to "improve" a feature or component by building it from scratch. The security risk is often greater than the improvement value.
+((("defensive programming")))((("security (smart contracts)","best practices")))
+_Defensive programming_ とはとりわけ、スマートコントラクトに相性のいいプログラミングスタイルのことです。以下の事柄が重要かつ良い教訓となります。
+
+Minimalism/simplicity::
+複雑性はセキュリティの敵である。
+より簡素であればあるほど、バグや未知の事象が生じる可能性が低い。
+初めて、スマートコントラクト言語に従事する時、よく開発者は沢山の量のコードを書こうとする。そうでなく、あなたがするべきことは、スマートコントラクトを書く際により少ない行数のコードでかくようにするべきだ。
+もし、誰かがあなたに、あるプロジェクトが「幾千もの行数のコード」を生成しているならば、まずあなたはその、プロジェクトのセキュリティを疑問に感じるべきだ。シンプルであればあるほど、よりセキュリティの高いものとなるものだ。
+
+コードの再利用:: 車輪のような部品をいちいち再発明しないようにすることもリスク低減に重要だと言っておこう。もし、ある一つのライブラリすなわちコントラクトが存在し、それはあなたの必要とするようなことを実現しているものであれば、それを再利用するのが良い。Within your own code, follow the DRY principle: Don't Repeat Yourself. If you see any snippet of code repeated more than once, ask yourself whether it could be written as a function or library and reused. Code that has been extensively used and tested is likely more secure than any new code you write. Beware of &#x201c;Not Invented Here&#x201d; syndrome, where you are tempted to "improve" a feature or component by building it from scratch. The security risk is often greater than the improvement value.
 
 Code quality:: Smart contract code is unforgiving. Every bug can lead to monetary loss. You should not treat smart contract programming the same way as general-purpose programming. Writing DApps in Solidity is not like creating a web widget in JavaScript. Rather, you should apply rigorous engineering and software development methodologies, as you would in aerospace engineering or any similarly unforgiving discipline. Once you "launch" your code, there's little you can do to fix any problems.
 
@@ -44,18 +59,17 @@ NOTE to editor
 The section headings "The Vulnerability" & "Preventive Techniques" throughout this chapter have been changed from headings to bold formatting intentionally so as not to clutter the table of contents with repetitive wording.
 ////
 
-((("reentrancy attacks","vulnerability", id="ix_09smart-contracts-security-asciidoc5", range="startofrange")))This type of attack can occur when a contract sends ether to an unknown address.
-An attacker can carefully construct a contract at an external address
-that contains malicious code in the fallback function. Thus, when a contract sends ether to this address, it will
-invoke the malicious code. Typically the malicious code executes a
-function on the vulnerable contract, performing operations not expected
-by the developer. The term "reentrancy" comes from the fact that the
-external malicious contract calls a function on the vulnerable
-contract and the path of code execution &#x201c;__reenters__&#x201d; it.
+((("reentrancy attacks","vulnerability", id="ix_09smart-contracts-security-asciidoc5", range="startofrange")))
 
-To clarify this, consider the simple vulnerable contract in <<etherstore_vulnerable>>, which acts as
-an Ethereum vault that allows depositors to withdraw only 1 ether per
-week.
+この種の攻撃は、ある一つのコントラクトが an unknown address へと ether を送金するときに生じる。
+ある一人の攻撃者は、その fallback function の中に悪意あるコードを含むようなコントラクトを用心深く慎重にある一つの external address の上に構築することが可能である。
+このようにすることで、あるコントラクトが、このアドレスへ ether を送金するとき、それは、悪意あるコードを呼び出す。
+典型的なものとして、その悪意あるコードは、その脆弱性のあるコントラクトに置いてある関数を実行します。それはその開発者が予期しないようなものです。
+"reentrancy" という言葉は、その外部の悪意あるコントラクトは脆弱性のあるコントラクトを呼び出し、コード実行のパスがその中に、&#x201c;__reenter__&#x201d; するのである。
+
+この話を明らかにするために、<<etherstore_vulnerable>>で、脆弱性のある簡素なコントラクトを考えてみよう。このコントラクトは、預金者が一週間にたった 1 ether しか引き出すことができない金庫の役割を果たすものとしましょう。
+
+
 
 [[etherstore_vulnerable]]
 .EtherStore.sol
@@ -168,10 +182,10 @@ then execute the fallback function.
 `withdrawFunds` function again and '__reenters__' the `EtherStore`
 contract.
 
-7. _EtherStore.sol_, line 11: In this second call to `withdrawFunds`, the
-attacking contract's balance is still `1 ether` as line 18 has not yet been executed. Thus, we
+7. _EtherStore.sol_, 11行目: この２回目の `withdrawFunds` を呼び出しする際、攻撃しているコントラクトの残高はまだ `1 ether`  であり、18行目はまだ実行されていない状態である。Thus, we
 still have `balances[0x0..123] = 1 ether`. This is also the case for the
 `lastWithdrawTime` variable. Again, we pass all the requirements.
+
 
 8. _EtherStore.sol_, line 17: The attacking contract withdraws another `1 ether`.
 
@@ -1948,7 +1962,7 @@ contract DistributeTokens {
     function distribute() public {
         require(msg.sender == owner); // only owner
         for(uint i = 0; i < investors.length; i++) {
-            // here transferToken(to,amount) transfers "amount" of 
+            // here transferToken(to,amount) transfers "amount" of
             // tokens to the address "to"
             transferToken(investors[i],investorTokens[i]);
         }
