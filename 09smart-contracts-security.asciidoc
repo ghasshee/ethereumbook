@@ -3,7 +3,7 @@
 
 ((("security (smart contracts)", id="ix_09smart-contracts-security-asciidoc0", range="startofrange")))((("smart contracts","security", id="ix_09smart-contracts-security-asciidoc1", range="startofrange")))
 
-セキュリティはスマートコントラクトを書く際、最も気をつけるべきことの一つである。スマートコントラクトのプログラミングの世界では、間違いを犯すと、簡単に発見され、ひどい痛手を追うことになる。
+セキュリティはスマートコントラクトを書く際、最も気をつけるべきことの一つである。スマートコントラクトのプログラミングの世界では、間違いを犯すと簡単に発見され、ひどい痛手を追うことになる。
 この章では、 我々のスマートコントラクト上で脆弱性を持つ "security antipatterns"　とともにセキュリティの教訓、デザインパターンを見ていこう。
 
 
@@ -20,13 +20,13 @@
 ((("defensive programming")))((("security (smart contracts)","best practices")))
 _Defensive programming_ とはとりわけ、スマートコントラクトに相性のいいプログラミングスタイルのことです。以下の事柄が重要かつ良い教訓となります。
 
-Minimalism/simplicity::
+Minimalism / simplicity::
 複雑性はセキュリティの敵である。
 より簡素であればあるほど、バグや未知の事象が生じる可能性が低い。
 初めて、スマートコントラクト言語に従事する時、よく開発者は沢山の量のコードを書こうとする。そうでなく、あなたがするべきことは、スマートコントラクトを書く際により少ない行数のコードでかくようにするべきだ。
 もし、誰かがあなたに、あるプロジェクトが「幾千もの行数のコード」を生成しているならば、まずあなたはその、プロジェクトのセキュリティを疑問に感じるべきだ。シンプルであればあるほど、よりセキュリティの高いものとなるものだ。
 
-コードの再利用:: 車輪のような部品をいちいち再発明しないようにすることもリスク低減に重要だと言っておこう。もし、ある一つのライブラリすなわちコントラクトが存在し、それはあなたの必要とするようなことを実現しているものであれば、それを再利用するのが良い。Within your own code, follow the DRY principle: Don't Repeat Yourself. If you see any snippet of code repeated more than once, ask yourself whether it could be written as a function or library and reused. Code that has been extensively used and tested is likely more secure than any new code you write. Beware of &#x201c;Not Invented Here&#x201d; syndrome, where you are tempted to "improve" a feature or component by building it from scratch. The security risk is often greater than the improvement value.
+コードの再利用:: 車輪のような部品をいちいち再発明しないようにすることもリスク低減に重要だと言っておこう。もし、ある一つのライブラリすなわちコントラクトが存在し、それはあなたの必要とするようなことを実現しているものであれば、それを再利用するのが良い。
 
 Code quality:: Smart contract code is unforgiving. Every bug can lead to monetary loss. You should not treat smart contract programming the same way as general-purpose programming. Writing DApps in Solidity is not like creating a web widget in JavaScript. Rather, you should apply rigorous engineering and software development methodologies, as you would in aerospace engineering or any similarly unforgiving discipline. Once you "launch" your code, there's little you can do to fix any problems.
 
@@ -74,7 +74,7 @@ The section headings "The Vulnerability" & "Preventive Techniques" throughout th
 [[etherstore_vulnerable]]
 .EtherStore.sol
 ====
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 contract EtherStore {
 
@@ -113,7 +113,7 @@ requested amount of ether. Consider an attacker who has created the contract in 
 [[etherstore_attack]]
 .Attack.sol
 ====
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 import "EtherStore.sol";
 
@@ -182,10 +182,9 @@ then execute the fallback function.
 `withdrawFunds` function again and '__reenters__' the `EtherStore`
 contract.
 
-7. _EtherStore.sol_, 11行目: この２回目の `withdrawFunds` を呼び出しする際、攻撃しているコントラクトの残高はまだ `1 ether`  であり、18行目はまだ実行されていない状態である。Thus, we
-still have `balances[0x0..123] = 1 ether`. This is also the case for the
-`lastWithdrawTime` variable. Again, we pass all the requirements.
-
+7. _EtherStore.sol_, line 11: この２回目の `withdrawFunds` を呼び出しする際、攻撃コントラクトの残高はまだ `1 ether` で、18行目はまだ実行されていない。
+このようにして、`balances[0x0..123] = 1 ether` とういう状態が持続するのだ。
+これは `lastWithdrawTime` についても同じことが言える。そうして再度すべての要求条件をみたすことになるのだ。
 
 8. _EtherStore.sol_, line 17: The attacking contract withdraws another `1 ether`.
 
@@ -227,7 +226,7 @@ Applying all of these techniques (using all three is unnecessary, but we do it
 for demonstrative purposes) to _EtherStore.sol_, gives the
 reentrancy-free contract:
 
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 contract EtherStore {
 
@@ -314,7 +313,7 @@ unexpected logic flows. For example, consider the +TimeLock+ contract in
 [[timelock_sol_security]]
 .TimeLock.sol
 ====
-[source,c,linenums]
+[source,linenums]
 ----
 contract TimeLock {
 
@@ -368,7 +367,7 @@ gives a solution to one of the levels_.
 [[underflow_vulnerability_example_from_ethernaut_challenge]]
 .Underflow vulnerability example from Ethernaut challenge
 ====
-[source,c,linenums]
+[source,linenums]
 ----
 pragma solidity ^0.4.18;
 
@@ -422,7 +421,7 @@ done a great job of building and auditing secure libraries for the Ethereum comm
 
 To demonstrate how these libraries are used in Solidity, let's correct the `TimeLock` contract using the `SafeMath` library. The overflow-free version of the contract is:
 
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 library SafeMath {
 
@@ -565,7 +564,7 @@ Let’s explore some pitfalls that can arise given this knowledge. Consider the 
 [[etherGame_security]]
 .EtherGame.sol
 ====
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 contract EtherGame {
 
@@ -646,7 +645,7 @@ forced ether sent via a `selfdestruct` call.
 With this in mind, a corrected version of the `EtherGame` contract could
 look like:
 
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 contract EtherGame {
 
@@ -738,7 +737,7 @@ modified from https://bit.ly/2MReuii[].)
 [[fibonacci_security]]
 .FibonacciLib.sol
 ====
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 // library contract - calculates Fibonacci-like numbers
 contract FibonacciLib {
@@ -774,7 +773,7 @@ Let us now consider a contract that utilizes this library, shown in <<fib_balanc
 [[fib_balance_security]]
 .FibonacciBalance.sol
 ====
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 contract FibonacciBalance {
 
@@ -910,7 +909,7 @@ contract will run (which can steal the entire balance of the contract)
 because we’ve modified the actual address for `fibonacciLibrary`. An
 example of such an attack contract would be:
 
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 contract Attack {
     uint storageSlot0; // corresponds to fibonacciLibrary
@@ -962,7 +961,7 @@ exploited. The library and wallet contracts can be found http://bit.ly/2OgnXQC[o
 
 The library contract is as follows:
 
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 contract WalletLibrary is WalletEvents {
 
@@ -991,7 +990,7 @@ contract WalletLibrary is WalletEvents {
 
 And here's the wallet contract:
 
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 contract Wallet is WalletEvents {
 
@@ -1061,7 +1060,7 @@ contract itself).
 
 Let's quickly explore a trivial example:
 
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 contract HashForEther {
 
@@ -1107,7 +1106,7 @@ contract containing the core functionality (as described in
 The library contract contains the code to initialize the wallet, as can
 be seen from the following snippet:
 
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 contract WalletLibrary is WalletEvents {
 
@@ -1235,7 +1234,7 @@ https://en.wikipedia.org/wiki/ROT13[ROT13 cipher].
 [[rot13_security]]
 .Rot13Encryption.sol
 ====
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 // encryption contract
 contract Rot13Encryption {
@@ -1291,7 +1290,7 @@ being discussed, so readers unfamiliar with assembly can safely ignore it.
 
 Now consider the following contract, which uses this code for its encryption:
 
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 import "Rot13Encryption.sol";
 
@@ -1315,7 +1314,7 @@ contract EncryptionContract {
 The issue with this contract is that the `encryptionLibrary` address is
 not public or constant. Thus, the deployer of the contract could give an address in the constructor that points to this contract:
 
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 // encryption contract
 contract Rot26Encryption {
@@ -1368,7 +1367,7 @@ This contract implements the ROT26 cipher, which shifts each character by 26 pla
 contract. More simply, the attacker could have linked the following
 contract to the same effect:
 
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 contract Print{
     event Print(string text);
@@ -1391,7 +1390,7 @@ being called, the fallback function will execute. For example, with the
 line pass:[<code>encryptionLibrary.&#x200b;<span class="keep-together">rot13Encrypt()</span></code>], if the contract specified by
 `encryptionLibrary` was:
 
-[source,c,linenums]
+[source,solidity,linenums]
 ----
  contract Blank {
      event Print(string text);
@@ -1427,7 +1426,7 @@ There are a number of techniques that prevent these scenarios.
 One technique is to use the `new` keyword to create contracts. In the
 preceding example, the constructor could be written as:
 
-[source,c]
+[source,solidity]
 ----
 constructor() {
     encryptionLibrary = new Rot13Encryption();
@@ -1463,7 +1462,7 @@ replacing an expected contract with a malicious one in the constructor.
 The code can be found
 http://bit.ly/2JtdqRi[here]:
 
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 pragma solidity ^0.4.19;
 
@@ -1576,7 +1575,7 @@ Consider the standard
 http://bit.ly/2CUf7WG[ERC20]
 +transfer+ function interface, noting the order of the parameters:
 
-[source,c,linenumes]
+[source,solidity]
 ----
 function transfer(address to, uint tokens) public returns (bool success);
 ----
@@ -1661,7 +1660,7 @@ Live Ethereum Contracts for the &lsquo;Unchecked-Send&rsquo; Bug&#x201d;].
 
 ((("unchecked CALL return value security threat","vulnerability")))Consider the following example:
 
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 contract Lotto {
 
@@ -1727,7 +1726,7 @@ function `cash` in <<lotto_security>>.
 [[lotto_security]]
 .lotto.sol: Code snippet
 ====
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 ...
   function cash(uint roundIndex, uint subpotIndex){
@@ -1808,7 +1807,7 @@ contract shown in <<findthishash_security>>.
 [[findthishash_security]]
 .FindThisHash.sol
 ====
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 contract FindThisHash {
     bytes32 constant public hash =
@@ -1897,7 +1896,7 @@ vulnerability (and ways to mitigate the attack).
 
 The standard specifies the `approve` function as:
 
-[source,c]
+[source,solidity]
 ----
 function approve(address _spender, uint256 _value) returns (bool success)
 ----
@@ -1945,7 +1944,7 @@ This pattern typically appears when an owner wishes to distribute tokens
 to investors with a `distribute`-like function,
 as in this example contract:
 +
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 contract DistributeTokens {
     address public owner; // gets set somewhere
@@ -1983,7 +1982,7 @@ the contract to proceed to the next state. One example would be an Initial Coin 
 contract that requires the owner to `finalize` the contract, which then
 allows tokens to be transferable. For example:
 +
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 bool public isFinalized = false;
 address public owner; // gets set somewhere
@@ -2087,7 +2086,7 @@ would be vulnerable to miner exploitation.
 [[roulette_security]]
 .roulette.sol
 ====
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 contract Roulette {
     uint public pastBlockTime; // forces one bet per block
@@ -2183,7 +2182,7 @@ contract, the constructor will behave like a normal function. This can
 lead to dire consequences, especially if the constructor performs
 privileged operations. Consider the following contract:
 
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 contract OwnerWallet {
     address public owner;
@@ -2260,7 +2259,7 @@ Let’s consider the relatively simple name registrar contract in <<nameregistra
 [[nameregistrar_security]]
 .NameRegistrar.sol
 ====
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 // A locked name registrar
 contract NameRegistrar {
@@ -2386,7 +2385,7 @@ try to highlight some of these in this section.
 
 Let's begin with a code example (we'll ignore over/underflow issues, discussed earlier in this chapter, for simplicity):
 
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 contract FunWithNumbers {
     uint constant public tokensPerEth = 10;
@@ -2495,7 +2494,7 @@ Consider the simple contract in <<phishable_security>>.
 [[phishable_security]]
 .Phishable.sol
 ====
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 contract Phishable {
     address public owner;
@@ -2518,7 +2517,7 @@ Notice that on line 11 the contract authorizes the `withdrawAll`
 function using `tx.origin`. This contract allows for an attacker to
 create an attacking contract of the form:
 
-[source,c,linenums]
+[source,solidity,linenums]
 ----
 import "Phishable.sol";
 
